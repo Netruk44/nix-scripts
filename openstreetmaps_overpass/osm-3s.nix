@@ -3,13 +3,14 @@
 
 pkgs.stdenv.mkDerivation rec {
   pname = "osm-3s";
-  version = "0.7.58.5";
+  version = "0.7.59";
   buildInputs = [pkgs.expat pkgs.zlib];
   enableParallelBuilding = true;
   src = pkgs.fetchurl {
     url = "http://dev.overpass-api.de/releases/osm-3s_v${version}.tar.gz";
-    sha256 = "1ipig0w3327nhl7dldcgkcm3fyhrib6h82n030rkb32bj9zr0g92";
+    sha256 = "02jk3rqhfwdhfnwxjwzr1fghr3hf998a3mhhk4gil3afkmcxd40l";
   };
+  CXXFLAGS = "-O2";
   meta = {
     description = "OpenStreetMaps Overpass API Server";
     longDescription = ''
