@@ -1,5 +1,5 @@
 # Static osm-3s + httpd docker image
-# Uses alpine linux docker image as a base and creates a layered image with apache + osm-3s binaries.
+# Uses httpd docker image as a base and creates a layered image with osm-3s binaries.
 # Does not perform any updates on the attached OSM database.
 #
 # Expected mount points:
@@ -14,15 +14,12 @@
 #   - fetch_osm.sh is not started.
 #   - apply_osc_to_db.sh is not started.
 #
-# To explore image:
-# docker run --rm -it --entrypoint /bin/bash osm-3s-static:latest-alpine
-#
 # To run:
+# ```
 # docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
 # -v <host-log-location>:/mnt/log       \
-# -p 8080:80                            \
-# osm-3s-static:latest-alpine
+# osm-3s-static:latest
 # ```
 #
 # To create and populate a new OSM database:
@@ -31,7 +28,7 @@
 # docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
 # -v <host-log-location>:/mnt/log       \
-# osm-3s-static:latest-alpine                  \
+# osm-3s-static:latest                  \
 # /bin/download_clone.sh --db-dir=/mnt/osm/db --source=http://dev.overpass-api.de/api_drolbr/ --meta=no
 # ```
 
@@ -46,33 +43,30 @@ let
   logDir = "/mnt/log"; # Where in the docker image logs should be written to.
   
   # Base docker image configuration
-  # Using Alpine Linux as a base
+  # Using apache/httpd as a base
   basePlatformImages = {
     "x86_64" = {
-      imageName = "alpine";
-      imageDigest = "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870";
-      sha256 = "1ly61z3bcs5qvqi2xxp3dd3llh61r9gygphl1ib8pxv64ix738mr";
-      finalImageName = "alpine";
-      finalImageTag = "3.16.2";
+      imageName = "httpd";
+      imageDigest = "sha256:15515209fb17e06010fa5af6fe15fa0351805cc12acfe82771c7724f06c34ae4";
+      sha256 = "1r3zvfas5nb757z26gjmmdkk4hzbrglmj2q9ckhkhdjf77c29qzr";
+      finalImageName = "httpd";
+      finalImageTag = "2.4.54";
     };
     "arm64" = {
-      imageName = "alpine";
-      imageDigest = "sha256:ed73e2bee79b3428995b16fce4221fc715a849152f364929cdccdc83db5f3d5c";
-      sha256 = "1507h3j6xar81cm2zbw7nxcp46z36aflfvsl4979b2kkv07m6q7r";
-      finalImageName = "alpine";
-      finalImageTag = "3.16.2";
+      imageName = "httpd";
+      imageDigest = "sha256:8b449db91d13460b848b60833cad68bd7f7076358f945bddf14ed4faf470fee4";
+      sha256 = "1a0b23pk5lf0fa2z1shggzmcskmj378rafdpfppwg8id6kfwfcgj";
+      finalImageName = "httpd";
+      finalImageTag = "2.4.54";
     };
   };
   currentBasePlatformImage = basePlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}";
 in
 pkgs.dockerTools.buildLayeredImage {
   name = "osm-3s-static";
-  tag = "latest-alpine";
+  tag = "latest-apache";
   contents = [
     osm3s
-    pkgs.apacheHttpd
-    pkgs.bash
-    pkgs.coreutils
     pkgs.nano
     ./root
   ];
@@ -80,10 +74,12 @@ pkgs.dockerTools.buildLayeredImage {
   extraCommands = ''
   # Create launch script
   # Launch osm dispatcher daemon (not necessary for static host)
+  echo "echo \"Starting OSM Dispatcher...\""
   echo "${osm3s}/bin/dispatcher --osm-base --db-dir=${osmDataDir}/${osmRelativeDbDir} 1>${logDir}/dispatcher.log 2>&1 &" >> ./start_server.sh
 
   # Launch apache/httpd
-  echo "${pkgs.apacheHttpd}/bin/httpd -DFOREGROUND" >> ./start_server.sh
+  echo "echo \"Starting httpd...\""
+  echo "/usr/local/bin/httpd-foreground" >> ./start_server.sh
 
   # Make script executable
   chmod +x ./start_server.sh
