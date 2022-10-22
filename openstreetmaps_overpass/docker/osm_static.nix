@@ -8,7 +8,7 @@
 #     - Diffs (if used) are expected to exist under ./diffs/
 #   - /mnt/log (Logging directory, configured with `logDir`)
 #
-# TODO: Contains Apache configuration for hosting an OSM database.
+# Contains Apache configuration for hosting an OSM database under ./image_root.
 #
 # No updates are automatically applied to the database.
 #   - fetch_osm.sh is not started.
@@ -23,7 +23,6 @@
 # ```
 #
 # To create and populate a new OSM database:
-# TODO: Validate
 # ```
 # docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
@@ -67,9 +66,9 @@ pkgs.dockerTools.buildLayeredImage {
   tag = "latest";
   contents = [
     osm3s
-    pkgs.nano
+    pkgs.nano # Useful for debugging, not necessary
     pkgs.wget
-    ./root
+    ./image_root
   ];
   fromImage = pkgs.dockerTools.pullImage currentBasePlatformImage;
   extraCommands = ''
