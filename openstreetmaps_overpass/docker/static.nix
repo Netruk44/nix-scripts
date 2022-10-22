@@ -51,7 +51,8 @@ let
     };
   };
   httpdImageTag = "2.4.54";
-  httpdImageName = "httpd";
+  httpdImageName = "httpd";      # e.g. nixos/nix
+  httpdFinalImageName = "httpd"; # e.g. nix
   currentHttpdPlatformImage = httpdPlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}";
 in
 pkgs.dockerTools.buildLayeredImage {
@@ -61,11 +62,11 @@ pkgs.dockerTools.buildLayeredImage {
     osm3s
   ];
   fromImage = pkgs.dockerTools.pullImage {
-    imageName = "httpd";
+    imageName = httpdImageName;
     imageDigest = currentHttpdPlatformImage.imageDigest;
     sha256 = currentHttpdPlatformImage.sha256;
     finalImageTag = httpdImageTag;
-    finalImageName = httpdImageName;
+    finalImageName = httpdFinalImageName;
   };
   extraCommands = ''
   # Create launch script
