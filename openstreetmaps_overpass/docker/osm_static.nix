@@ -75,7 +75,7 @@ pkgs.dockerTools.buildLayeredImage {
   # Create launch script
   # Launch osm dispatcher daemon
   echo "echo \"Starting OSM Dispatcher...\""
-  echo "rm ${osmDataDir}/${osmRelativeDbDir}/osm3s_v0.7.58_osm_base || true" >> ./start_server.sh
+  echo "rm ${osmDataDir}/${osmRelativeDbDir}/osm3s_v* || true" >> ./start_server.sh
   echo "${osm3s}/bin/dispatcher --osm-base --db-dir=${osmDataDir}/${osmRelativeDbDir} 1>${logDir}/dispatcher.log 2>&1 &" >> ./start_server.sh
 
   # Launch apache/httpd
