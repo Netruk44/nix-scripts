@@ -46,17 +46,20 @@ let
   # Using apache/httpd as a base
   basePlatformImages = {
     "x86_64" = {
+      imageName = "httpd";
       imageDigest = "sha256:15515209fb17e06010fa5af6fe15fa0351805cc12acfe82771c7724f06c34ae4";
       sha256 = "1r3zvfas5nb757z26gjmmdkk4hzbrglmj2q9ckhkhdjf77c29qzr";
+      finalImageName = "httpd";
+      finalImageTag = "2.4.54";
     };
     "arm64" = {
+      imageName = "httpd";
       imageDigest = "sha256:8b449db91d13460b848b60833cad68bd7f7076358f945bddf14ed4faf470fee4";
       sha256 = "1a0b23pk5lf0fa2z1shggzmcskmj378rafdpfppwg8id6kfwfcgj";
+      finalImageName = "httpd";
+      finalImageTag = "2.4.54";
     };
   };
-  baseImageTag = "2.4.54";
-  baseImageName = "httpd";      # e.g. nixos/nix
-  baseFinalImageName = "httpd"; # e.g. nix
   currentBasePlatformImage = basePlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}";
 in
 pkgs.dockerTools.buildLayeredImage {
@@ -64,14 +67,9 @@ pkgs.dockerTools.buildLayeredImage {
   tag = "latest-apache";
   contents = [
     osm3s
+    ./root
   ];
-  fromImage = pkgs.dockerTools.pullImage {
-    imageName = baseImageName;
-    imageDigest = currentBasePlatformImage.imageDigest;
-    sha256 = currentBasePlatformImage.sha256;
-    finalImageTag = baseImageTag;
-    finalImageName = baseFinalImageName;
-  };
+  fromImage = pkgs.dockerTools.pullImage currentBasePlatformImage;
   extraCommands = ''
   # Create launch script
   # Launch osm dispatcher daemon (not necessary for static host)

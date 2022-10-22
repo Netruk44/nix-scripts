@@ -14,11 +14,15 @@
 #   - fetch_osm.sh is not started.
 #   - apply_osc_to_db.sh is not started.
 #
+# To explore image:
+# docker run --rm -it --entrypoint /bin/bash osm-3s-static:latest-alpine
+#
 # To run:
 # docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
 # -v <host-log-location>:/mnt/log       \
-# osm-3s-static:latest
+# -p 8080:80                            \
+# osm-3s-static:latest-alpine
 # ```
 #
 # To create and populate a new OSM database:
@@ -27,7 +31,7 @@
 # docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
 # -v <host-log-location>:/mnt/log       \
-# osm-3s-static:latest                  \
+# osm-3s-static:latest-alpine                  \
 # /bin/download_clone.sh --db-dir=/mnt/osm/db --source=http://dev.overpass-api.de/api_drolbr/ --meta=no
 # ```
 
@@ -45,17 +49,20 @@ let
   # Using Alpine Linux as a base
   basePlatformImages = {
     "x86_64" = {
+      imageName = "alpine";
       imageDigest = "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870";
       sha256 = "1ly61z3bcs5qvqi2xxp3dd3llh61r9gygphl1ib8pxv64ix738mr";
+      finalImageName = "alpine";
+      finalImageTag = "3.16.2";
     };
     "arm64" = {
+      imageName = "alpine";
       imageDigest = "sha256:ed73e2bee79b3428995b16fce4221fc715a849152f364929cdccdc83db5f3d5c";
       sha256 = "1507h3j6xar81cm2zbw7nxcp46z36aflfvsl4979b2kkv07m6q7r";
+      finalImageName = "alpine";
+      finalImageTag = "3.16.2";
     };
   };
-  baseImageTag = "3.16.2";
-  baseImageName = "alpine";      # e.g. nixos/nix
-  baseFinalImageName = "alpine"; # e.g. nix
   currentBasePlatformImage = basePlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}";
 in
 pkgs.dockerTools.buildLayeredImage {
@@ -67,14 +74,9 @@ pkgs.dockerTools.buildLayeredImage {
     pkgs.bash
     pkgs.coreutils
     pkgs.nano
+    ./root
   ];
-  fromImage = pkgs.dockerTools.pullImage {
-    imageName = baseImageName;
-    imageDigest = currentBasePlatformImage.imageDigest;
-    sha256 = currentBasePlatformImage.sha256;
-    finalImageTag = baseImageTag;
-    finalImageName = baseFinalImageName;
-  };
+  fromImage = pkgs.dockerTools.pullImage currentBasePlatformImage;
   extraCommands = ''
   # Create launch script
   # Launch osm dispatcher daemon (not necessary for static host)
