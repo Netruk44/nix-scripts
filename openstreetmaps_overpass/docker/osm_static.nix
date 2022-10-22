@@ -68,6 +68,7 @@ pkgs.dockerTools.buildLayeredImage {
   contents = [
     osm3s
     pkgs.nano
+    pkgs.wget
     ./root
   ];
   fromImage = pkgs.dockerTools.pullImage currentBasePlatformImage;
