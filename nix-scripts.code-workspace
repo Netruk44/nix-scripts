@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../../../../mnt/ext/log"
 		}
 	],
 	"settings": {}
