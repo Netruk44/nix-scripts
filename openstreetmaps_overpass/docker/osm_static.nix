@@ -64,7 +64,7 @@ let
 in
 pkgs.dockerTools.buildLayeredImage {
   name = "osm-3s-static";
-  tag = "latest-apache";
+  tag = "latest";
   contents = [
     osm3s
     pkgs.nano
