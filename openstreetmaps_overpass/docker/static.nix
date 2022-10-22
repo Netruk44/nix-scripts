@@ -9,7 +9,7 @@
 }:
 
 let
-  osm = import ../osm-3s.nix;
+  osm = import ../osm-3s.nix {};
   httpdPlatformImages = {
     "x86_64" = {
       imageDigest = "sha256:15515209fb17e06010fa5af6fe15fa0351805cc12acfe82771c7724f06c34ae4";
@@ -30,7 +30,7 @@ pkgs.dockerTools.buildLayeredImage {
   contents = [
     osm
   ];
-  from = pkgs.dockerTools.pullImage {
+  fromImage = pkgs.dockerTools.pullImage {
     imageName = "httpd";
     imageDigest = currentHttpdPlatformImage.imageDigest;
     sha256 = currentHttpdPlatformImage.sha256;
