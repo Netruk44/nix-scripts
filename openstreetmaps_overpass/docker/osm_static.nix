@@ -66,9 +66,9 @@ pkgs.dockerTools.buildLayeredImage {
   tag = "latest";
   contents = [
     osm3s
-    pkgs.nano # Useful for debugging, not necessary
-    pkgs.wget
-    ./image_root
+    pkgs.nano     # Useful for debugging, not necessary
+    pkgs.wget     # Required for download_clone.sh and fetch_osm.sh
+    ./image_root  # Apache host configuration
   ];
   fromImage = pkgs.dockerTools.pullImage currentBasePlatformImage;
   extraCommands = ''
