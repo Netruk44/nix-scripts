@@ -3,8 +3,8 @@
 # Does not perform any updates on the attached OSM database.
 #
 # Expected mount points:
-#   - /mnt/osm (Data directory for OSM, configured with `osmDataDir`)
-#     - Database is expected to exist under ./db/ (Can be configured with `osmRelativeDbDir`)
+#   - /mnt/osm (Data directory for OSM)
+#     - Database is expected to exist under ./db/
 #     - Diffs (if used) are expected to exist under ./diffs/
 #   - /mnt/log (Logging directory, configured with `logDir`)
 #
@@ -16,9 +16,10 @@
 #
 # To run:
 # ```
-# docker run                            \
+# docker [run/create]                   \
 # -v <host-osm-data-location>:/mnt/osm  \
 # -v <host-log-location>:/mnt/log       \
+# -p 8080:80                            \
 # osm-3s-static:latest
 # ```
 #
@@ -26,7 +27,6 @@
 # ```
 # docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
-# -v <host-log-location>:/mnt/log       \
 # osm-3s-static:latest                  \
 # /bin/download_clone.sh --db-dir=/mnt/osm/db --source=http://dev.overpass-api.de/api_drolbr/ --meta=no
 # ```
