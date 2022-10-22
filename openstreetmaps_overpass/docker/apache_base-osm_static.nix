@@ -16,16 +16,19 @@
 #
 # To run:
 # ```
-# docker run osm-3s-static:latest       \
+# docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
-# -v <host-log-location>:/mnt/log
+# -v <host-log-location>:/mnt/log       \
+# osm-3s-static:latest
 # ```
 #
 # To create and populate a new OSM database:
+# TODO: Validate
 # ```
-# docker run osm-3s-static:latest       \
+# docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
 # -v <host-log-location>:/mnt/log       \
+# osm-3s-static:latest                  \
 # /bin/download_clone.sh --db-dir=/mnt/osm/db --source=http://dev.overpass-api.de/api_drolbr/ --meta=no
 # ```
 
@@ -58,7 +61,7 @@ let
 in
 pkgs.dockerTools.buildLayeredImage {
   name = "osm-3s-static";
-  tag = "latest";
+  tag = "latest-apache";
   contents = [
     osm3s
   ];
@@ -72,10 +75,15 @@ pkgs.dockerTools.buildLayeredImage {
   extraCommands = ''
   # Create launch script
   # Launch osm dispatcher daemon (not necessary for static host)
+  echo "echo \"Starting OSM Dispatcher...\""
   echo "${osm3s}/bin/dispatcher --osm-base --db-dir=${osmDataDir}/${osmRelativeDbDir} 1>${logDir}/dispatcher.log 2>&1 &" >> ./start_server.sh
 
   # Launch apache/httpd
+  echo "echo \"Starting httpd...\""
   echo "/usr/local/bin/httpd-foreground" >> ./start_server.sh
+
+  # Make script executable
+  chmod +x ./start_server.sh
 '';
   config = {
     Cmd = ["${pkgs.bash}/bin/bash" "-c" "./start_server.sh"];

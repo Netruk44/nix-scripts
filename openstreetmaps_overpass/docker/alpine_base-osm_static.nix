@@ -15,17 +15,19 @@
 #   - apply_osc_to_db.sh is not started.
 #
 # To run:
-# ```
-# docker run osm-3s-static:latest       \
+# docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
-# -v <host-log-location>:/mnt/log
+# -v <host-log-location>:/mnt/log       \
+# osm-3s-static:latest
 # ```
 #
 # To create and populate a new OSM database:
+# TODO: Validate
 # ```
-# docker run osm-3s-static:latest       \
+# docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
 # -v <host-log-location>:/mnt/log       \
+# osm-3s-static:latest                  \
 # /bin/download_clone.sh --db-dir=/mnt/osm/db --source=http://dev.overpass-api.de/api_drolbr/ --meta=no
 # ```
 
@@ -58,7 +60,7 @@ let
 in
 pkgs.dockerTools.buildLayeredImage {
   name = "osm-3s-static";
-  tag = "latest";
+  tag = "latest-alpine";
   contents = [
     osm3s
     pkgs.apacheHttpd
@@ -80,6 +82,9 @@ pkgs.dockerTools.buildLayeredImage {
 
   # Launch apache/httpd
   echo "${pkgs.apacheHttpd}/bin/httpd -DFOREGROUND" >> ./start_server.sh
+
+  # Make script executable
+  chmod +x ./start_server.sh
 '';
   config = {
     Cmd = ["${pkgs.bash}/bin/bash" "-c" "./start_server.sh"];
