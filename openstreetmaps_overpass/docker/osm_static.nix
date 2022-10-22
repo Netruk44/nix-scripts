@@ -31,7 +31,7 @@
 # /bin/download_clone.sh --db-dir=/mnt/osm/db --source=http://dev.overpass-api.de/api_drolbr/ --meta=no
 # ```
 
-{ pkgs ? import <nixpkgs> {}
+{ pkgs ? import <nixpkgs> { pkgs = pkgs; }
 }:
 
 let
@@ -42,7 +42,7 @@ let
   logDir = "/mnt/log"; # Where in the docker image logs should be written to.
   
   # Base docker image configuration
-  # Using apache/httpd as a base
+  # Using apache/httpd as a base, as it includes apache utility binaries and configuration already setup.
   basePlatformImages = {
     "x86_64" = {
       imageName = "httpd";
