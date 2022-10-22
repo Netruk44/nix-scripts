@@ -1,5 +1,5 @@
 # Static osm-3s + httpd docker image
-# Uses httpd docker image as a base and creates a layered image with osm-3s binaries.
+# Uses alpine linux docker image as a base and creates a layered image with apache + osm-3s binaries.
 # Does not perform any updates on the attached OSM database.
 #
 # Expected mount points:
@@ -39,34 +39,39 @@ let
   osmRelativeDbDir = "db"; # Where, relative to osmDataDir, the db directory is located.
   logDir = "/mnt/log"; # Where in the docker image logs should be written to.
   
-  # Apache/httpd docker image configuration
-  httpdPlatformImages = {
+  # Base docker image configuration
+  # Using Alpine Linux as a base
+  basePlatformImages = {
     "x86_64" = {
-      imageDigest = "sha256:15515209fb17e06010fa5af6fe15fa0351805cc12acfe82771c7724f06c34ae4";
-      sha256 = "1r3zvfas5nb757z26gjmmdkk4hzbrglmj2q9ckhkhdjf77c29qzr";
+      imageDigest = "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870";
+      sha256 = "1ly61z3bcs5qvqi2xxp3dd3llh61r9gygphl1ib8pxv64ix738mr";
     };
     "arm64" = {
-      imageDigest = "sha256:8b449db91d13460b848b60833cad68bd7f7076358f945bddf14ed4faf470fee4";
-      sha256 = "1a0b23pk5lf0fa2z1shggzmcskmj378rafdpfppwg8id6kfwfcgj";
+      imageDigest = "sha256:ed73e2bee79b3428995b16fce4221fc715a849152f364929cdccdc83db5f3d5c";
+      sha256 = "1507h3j6xar81cm2zbw7nxcp46z36aflfvsl4979b2kkv07m6q7r";
     };
   };
-  httpdImageTag = "2.4.54";
-  httpdImageName = "httpd";      # e.g. nixos/nix
-  httpdFinalImageName = "httpd"; # e.g. nix
-  currentHttpdPlatformImage = httpdPlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}";
+  baseImageTag = "3.16.2";
+  baseImageName = "alpine";      # e.g. nixos/nix
+  baseFinalImageName = "alpine"; # e.g. nix
+  currentBasePlatformImage = basePlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}";
 in
 pkgs.dockerTools.buildLayeredImage {
   name = "osm-3s-static";
   tag = "latest";
   contents = [
     osm3s
+    pkgs.apacheHttpd
+    pkgs.bash
+    pkgs.coreutils
+    pkgs.nano
   ];
   fromImage = pkgs.dockerTools.pullImage {
-    imageName = httpdImageName;
-    imageDigest = currentHttpdPlatformImage.imageDigest;
-    sha256 = currentHttpdPlatformImage.sha256;
-    finalImageTag = httpdImageTag;
-    finalImageName = httpdFinalImageName;
+    imageName = baseImageName;
+    imageDigest = currentBasePlatformImage.imageDigest;
+    sha256 = currentBasePlatformImage.sha256;
+    finalImageTag = baseImageTag;
+    finalImageName = baseFinalImageName;
   };
   extraCommands = ''
   # Create launch script
@@ -74,7 +79,7 @@ pkgs.dockerTools.buildLayeredImage {
   echo "${osm3s}/bin/dispatcher --osm-base --db-dir=${osmDataDir}/${osmRelativeDbDir} 1>${logDir}/dispatcher.log 2>&1 &" >> ./start_server.sh
 
   # Launch apache/httpd
-  echo "/usr/local/bin/httpd-foreground" >> ./start_server.sh
+  echo "${pkgs.apacheHttpd}/bin/httpd -DFOREGROUND" >> ./start_server.sh
 '';
   config = {
     Cmd = ["${pkgs.bash}/bin/bash" "-c" "./start_server.sh"];
