@@ -15,14 +15,14 @@ let
       imageDigest = "sha256:15515209fb17e06010fa5af6fe15fa0351805cc12acfe82771c7724f06c34ae4";
       sha256 = "";
     };
-    "Aarch64" = {
+    "arm64" = {
       imageDigest = "sha256:8b449db91d13460b848b60833cad68bd7f7076358f945bddf14ed4faf470fee4";
       sha256 = "";
     };
   };
   httpdImageTag = "2.4.54";
   httpdImageName = "httpd";
-  currentHttpdPlatformImage = httpdPlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}"
+  currentHttpdPlatformImage = httpdPlatformImages."${pkgs.stdenv.hostPlatform.linuxArch}";
 in
 pkgs.dockerTools.buildLayeredImage {
   name = "osm-3s-static";
