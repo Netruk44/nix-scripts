@@ -8,7 +8,7 @@
 #     - Diffs (if used) are expected to exist under ./diffs/
 #   - /mnt/log (Logging directory, configured with `logDir`)
 #
-# Contains Apache configuration for hosting an OSM database under ./image_root.
+# Contains Apache configuration for hosting an OSM server under ./image_root.
 #
 # No updates are automatically applied to the database.
 #   - fetch_osm.sh is not started.
