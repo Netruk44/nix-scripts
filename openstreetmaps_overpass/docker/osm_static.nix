@@ -24,6 +24,9 @@
 # ```
 #
 # To create and populate a new OSM database:
+# NOTE: As of October 2022, this requires ~180 GB, and is always increasing.
+#       You can get a rough estimate of space needed by looking at the size of planet.osm: https://planet.openstreetmap.org/
+#       As of October 2022, the planet.osm file is 120 GB. Multiply by 1.5 for *rough* estimate of database size.
 # ```
 # docker run                            \
 # -v <host-osm-data-location>:/mnt/osm  \
@@ -80,7 +83,7 @@ pkgs.dockerTools.buildLayeredImage {
   contents = [
     osm3s
     pkgs.nano     # Useful for debugging, not necessary
-    pkgs.wget     # Required for download_clone.sh and fetch_osm.sh
+    #pkgs.wget     # Required for download_clone.sh and fetch_osm.sh
     ./image_root  # Apache host configuration
   ];
   fromImage = pkgs.dockerTools.pullImage currentBasePlatformImage;
