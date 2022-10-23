@@ -40,6 +40,19 @@ let
   osmDataDir = "/mnt/osm"; # Where in the docker image the root OSM directory is located.
   osmRelativeDbDir = "db"; # Where, relative to osmDataDir, the db directory is located.
   logDir = "/mnt/log"; # Where in the docker image logs should be written to.
+
+  startupScript = pkgs.writeTextFile {
+    name = "/start_server.sh";
+    executable = true;
+    text = ''
+    echo "Starting OSM Dispatcher..."
+    rm ${osmDataDir}/${osmRelativeDbDir}/osm3s_v* || true
+    ${osm3s}/bin/dispatcher --osm-base --db-dir=${osmDataDir}/${osmRelativeDbDir} 1>${logDir}/dispatcher.log 2>&1 &
+
+    echo "Starting httpd..."
+    /usr/local/bin/httpd-foreground
+    '';
+  };
   
   # Base docker image configuration
   # Using apache/httpd as a base, as it includes apache utility binaries and configuration already setup.
@@ -71,21 +84,7 @@ pkgs.dockerTools.buildLayeredImage {
     ./image_root  # Apache host configuration
   ];
   fromImage = pkgs.dockerTools.pullImage currentBasePlatformImage;
-  extraCommands = ''
-  # Create launch script
-  # Launch osm dispatcher daemon
-  echo "echo \"Starting OSM Dispatcher...\""
-  echo "rm ${osmDataDir}/${osmRelativeDbDir}/osm3s_v* || true" >> ./start_server.sh
-  echo "${osm3s}/bin/dispatcher --osm-base --db-dir=${osmDataDir}/${osmRelativeDbDir} 1>${logDir}/dispatcher.log 2>&1 &" >> ./start_server.sh
-
-  # Launch apache/httpd
-  echo "echo \"Starting httpd...\""
-  echo "/usr/local/bin/httpd-foreground" >> ./start_server.sh
-
-  # Make script executable
-  chmod +x ./start_server.sh
-'';
   config = {
-    Cmd = ["${pkgs.bash}/bin/bash" "-c" "./start_server.sh"];
+    Cmd = ["${pkgs.bash}/bin/bash" "-c" startupScript];
   };
 }
