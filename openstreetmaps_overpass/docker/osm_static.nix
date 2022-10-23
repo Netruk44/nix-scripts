@@ -42,7 +42,7 @@ let
   logDir = "/mnt/log"; # Where in the docker image logs should be written to.
 
   startupScript = pkgs.writeTextFile {
-    name = "/start_server.sh";
+    name = "start_server.sh";
     executable = true;
     text = ''
     echo "Starting OSM Dispatcher..."
