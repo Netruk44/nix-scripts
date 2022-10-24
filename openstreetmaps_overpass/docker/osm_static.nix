@@ -34,7 +34,7 @@
 # /bin/download_clone.sh --db-dir=/mnt/osm/db --source=http://dev.overpass-api.de/api_drolbr/ --meta=no
 # ```
 
-{ pkgs ? import <nixpkgs> { pkgs = pkgs; }
+{ pkgs ? import <nixpkgs> {}
 }:
 
 let
